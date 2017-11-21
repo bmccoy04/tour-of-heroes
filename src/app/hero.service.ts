@@ -10,6 +10,10 @@ import { catchError, map, tap } from 'rxjs/operators';
 @Injectable()
 export class HeroService {
   private heroApi: string = 'api/heroes';
+  private httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  };
+
   constructor(private httpClient: HttpClient, private messageService: MessageService) { }
 
   private log(message: string){
@@ -18,13 +22,36 @@ export class HeroService {
   getHeros(): Observable<Hero[]>{
     this.messageService.add("HeroService: Fetched Heros");
     return this.httpClient.get<Hero[]>(this.heroApi).pipe(
+      tap(heroes => this.log("Fetched Heroes")),
       catchError(this.handleError('getHeroes', []))
     );
   }
 
   getHero(id: number): Observable<Hero>{
     this.messageService.add(`HeroService: Fetched Hero id = ${id}`);
-    return of(Heros.find(x => x.id == id));
+    return this.httpClient.get<Hero>(this.heroApi + `/${id}`).pipe(
+      tap(_ => this.log(`Fetched Hero Id: ${id}`)),
+      catchError(this.handleError<Hero>(`getHero ${id}`))
+    );
+  }
+
+  addHero(hero:Hero): Observable<Hero>{
+    this.messageService.add(`HeroService: Add Hero name= ${hero.name}`);
+
+    return this.httpClient.post<Hero>(this.heroApi, hero, this.httpOptions).pipe(
+      tap(_ => this.log(`Added hero`)),
+      catchError(this.handleError<any>(`add hero ${hero.name}`))
+    )
+  }
+
+  updateHero(hero:Hero): Observable<Hero>{
+
+    this.messageService.add(`HeroService: Updated Hero id = ${hero.id}`);
+
+    return this.httpClient.put<Hero>(this.heroApi, hero, this.httpOptions).pipe(
+      tap(_ => this.log(`Updated Hero Id: ${hero.id}`)),
+      catchError(this.handleError<Hero>(`updateHero ${hero.id}`))
+    );
   }
 
   private handleError<T> (operation = 'operation', result?: T) {

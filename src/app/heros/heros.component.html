@@ -1,4 +1,11 @@
 <h2>My Heroes</h2>
+<div>
+  <label for="heroName">Hero name:
+    <input type="text" #heroName>
+  </label>
+  <button (click)="add(heroName.value); heroName.value=''">Add:</button>
+</div>
+
 <ul class="heroes">
   <li *ngFor="let hero of heros">
     <a routerLink="/detail/{{hero.id}}">
