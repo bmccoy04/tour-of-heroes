@@ -54,6 +54,18 @@ export class HeroService {
     );
   }
 
+  deleteHero(hero:Hero | number): Observable<any>{
+
+    const id = typeof hero === 'number' ? hero : hero.id; 
+    const heroAddress =  `${this.heroApi}/${id}`;
+
+    this.messageService.add(`HeroService: Delete Hero id = ${id}`);
+    return this.httpClient.delete<Hero>(heroAddress, this.httpOptions).pipe(
+      tap(_ => this.log(`Deleted Hero Id: ${id}`)),
+      catchError(this.handleError<any>(`delete hero: ${hero}`))
+    );
+  }
+
   private handleError<T> (operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
    
