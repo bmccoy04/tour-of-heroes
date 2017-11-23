@@ -45,7 +45,6 @@ export class HeroService {
   }
 
   updateHero(hero:Hero): Observable<Hero>{
-
     this.messageService.add(`HeroService: Updated Hero id = ${hero.id}`);
 
     return this.httpClient.put<Hero>(this.heroApi, hero, this.httpOptions).pipe(
@@ -55,7 +54,6 @@ export class HeroService {
   }
 
   deleteHero(hero:Hero | number): Observable<any>{
-
     const id = typeof hero === 'number' ? hero : hero.id; 
     const heroAddress =  `${this.heroApi}/${id}`;
 
@@ -63,6 +61,17 @@ export class HeroService {
     return this.httpClient.delete<Hero>(heroAddress, this.httpOptions).pipe(
       tap(_ => this.log(`Deleted Hero Id: ${id}`)),
       catchError(this.handleError<any>(`delete hero: ${hero}`))
+    );
+  }
+
+  searchHeroes(term:string):Observable<Hero[]>{
+    if(!term.trim()){
+      return of([]);
+    }
+
+    return this.httpClient.get<Hero[]>(`api/heroes/?name=${term}`).pipe(
+      tap(_ => this.log(`Searching Heroes term: ${term}`)),
+      catchError(this.handleError<any>(`search hero: ${term}`, []))
     );
   }
 
